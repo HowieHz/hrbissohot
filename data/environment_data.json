@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-26T18:02:38.739230",
+    "total_schools": 1,
+    "total_reports": 2
+  },
+  "schools": [
+    {
+      "school_code": "example",
+      "school_name": "example",
+      "dormitory": [
+        {
+          "title": "哈工大宿舍环境信息 - 数据征集中",
+          "file_path": "schools/example/dormitory/2024_summer_dorm_report.md",
+          "category": "dormitory",
+          "temperatures": [],
+          "costs": [],
+          "satisfaction": null,
+          "credibility": null,
+          "word_count": 942,
+          "last_modified": "2025-06-26"
+        }
+      ],
+      "cooling": [],
+      "feedback": [
+        {
+          "title": "哈工大空调安装相关反馈 - 信息征集中",
+          "file_path": "schools/example/feedback/ac_complaint_2024.md",
+          "category": "feedback",
+          "temperatures": [],
+          "costs": [],
+          "satisfaction": null,
+          "credibility": null,
+          "word_count": 1349,
+          "last_modified": "2025-06-26"
+        }
+      ],
+      "costs": [],
+      "statistics": {
+        "total_reports": 2,
+        "avg_temperature": null,
+        "total_costs": 0,
+        "avg_satisfaction": null
+      }
+    }
+  ]
+}
