@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哈尔滨太™热了 - 高校环境真实反馈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 40px;
+            background: rgba(255, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: heat-wave 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes heat-wave {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.05) rotate(1deg); }
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 15px;
+        }
+        
+        .temperature-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .info-card h3 {
+            color: #ff6b6b;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .temperature-range {
+            background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .schools-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .schools-section h2 {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+        
+        .schools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .school-card {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .school-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .school-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .school-card .temperature {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .school-card .status {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .contribute-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .contribute-section h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .contribute-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 25px;
+            border: 2px solid white;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .heat-warning {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+        }
+        
+        .thermometer {
+            width: 50px;
+            height: 200px;
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(to top, #ff4444 0%, #ff4444 70%, #ffffff 70%);
+            border-radius: 25px;
+            border: 3px solid #333;
+            animation: temperature-rise 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes temperature-rise {
+            0% { background: linear-gradient(to top, #ff4444 0%, #ff4444 60%, #ffffff 60%); }
+            100% { background: linear-gradient(to top, #ff4444 0%, #ff4444 85%, #ffffff 85%); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .thermometer {
+                display: none;
+            }
+            
+            .contribute-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="thermometer"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔥 哈尔滨太™热了！🔥</h1>
+            <p>高考填志愿？先看看这些学校夏天到底有多热！</p>
+            <p>真实学生反馈 | 宿舍环境实录 | 生活成本参考</p>
+            <div class="temperature-display">
+                当前室外: <span id="current-temp">35°C</span>
+            </div>
+        </div>
+        
+        <div class="heat-warning">
+            ⚠️ 注意：哈尔滨夏季最高温度可达35°C+，不要被"东北很凉快"的刻板印象骗了！
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>� 宿舍环境</h3>
+                <p>真实室内温度记录</p>
+                <div class="temperature-range">
+                    26°C - 35°C
+                </div>
+                <p>• 多数宿舍无空调</p>
+                <p>• 通风情况参差不齐</p>
+                <p>• 南向房间更热</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>❄️ 降温设施</h3>
+                <p>空调安装进展缓慢</p>
+                <p>• 部分学校正在改造</p>
+                <p>• 大多仍靠风扇度夏</p>
+                <p>• 公共区域有空调</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>� 额外成本</h3>
+                <p>夏季降温必须花费</p>
+                <p>• 风扇：80-150元</p>
+                <p>• 冰贴凉席：50-100元</p>
+                <p>• 额外电费：50元/月</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>� 投诉反馈</h3>
+                <p>学校处理态度参考</p>
+                <p>• 响应速度不一</p>
+                <p>• 解决效果有限</p>
+                <p>• 长期规划不明确</p>
+            </div>
+        </div>
+        
+        <div class="schools-section">
+            <h2>🏫 各校真实情况速览</h2>
+            <div class="schools-grid">
+                <div class="school-card" onclick="showSchoolDetail('hit')">
+                    <h4>🔧 哈尔滨工业大学</h4>
+                    <div class="temperature">室内: 数据征集中</div>
+                    <div class="status">� 征集中 | 空调情况待确认</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('heu')">
+                    <h4>🚢 哈尔滨工程大学</h4>
+                    <div class="temperature">室内: 数据征集中</div>
+                    <div class="status">📝 征集中 | 情况待确认</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('nefu')">
+                    <h4>🌲 东北林业大学</h4>
+                    <div class="temperature">室内: 数据征集中</div>
+                    <div class="status">📝 征集中 | 情况待确认</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('neau')">
+                    <h4>🌾 东北农业大学</h4>
+                    <div class="temperature">室内: 数据征集中</div>
+                    <div class="status">📝 征集中 | 情况待确认</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('hrbmu')">
+                    <h4>🏥 哈尔滨医科大学</h4>
+                    <div class="temperature">室内: 数据征集中</div>
+                    <div class="status">📝 征集中 | 情况待确认</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('hlju')">
+                    <h4>� 黑龙江大学</h4>
+                    <div class="temperature">室内: 待补充</div>
+                    <div class="status">📝 征集中</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('hrbnu')">
+                    <h4>👨‍🏫 哈尔滨师范大学</h4>
+                    <div class="temperature">室内: 待补充</div>
+                    <div class="status">📝 征集中</div>
+                </div>
+                
+                <div class="school-card" onclick="showSchoolDetail('hust')">
+                    <h4>⚙️ 哈尔滨理工大学</h4>
+                    <div class="temperature">室内: 待补充</div>
+                    <div class="status">📝 征集中</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contribute-section">
+            <h2>📢 你的声音很重要！</h2>
+            <p>帮助学弟学妹了解真实情况，推动学校改善环境</p>
+            <div class="contribute-buttons">
+                <a href="#" class="btn" onclick="contributeData()">🌡️ 提交温度数据</a>
+                <a href="#" class="btn" onclick="reportIssue()">📝 投诉反馈记录</a>
+                <a href="#" class="btn" onclick="shareCosts()">💰 分享生活成本</a>
+                <a href="#" class="btn" onclick="viewReports()">📊 查看详细报告</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>💡 <strong>项目目标</strong>：为高考生提供真实环境参考，推动高校改善学生生活条件</p>
+            <p>🔥 数据来源：在校学生真实反馈 | 📊 持续更新中</p>
+            <p>Made with 🔥❤️ for 哈尔滨学子</p>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟温度变化
+        function updateTemperature() {
+            const temps = [32, 33, 34, 35, 36, 34, 33];
+            const randomTemp = temps[Math.floor(Math.random() * temps.length)];
+            document.getElementById('current-temp').textContent = randomTemp + '°C';
+            
+            // 根据温度改变颜色
+            const tempElement = document.getElementById('current-temp');
+            if (randomTemp >= 35) {
+                tempElement.style.color = '#ff0000';
+            } else if (randomTemp >= 32) {
+                tempElement.style.color = '#ff6600';
+            } else {
+                tempElement.style.color = '#ffaa00';
+            }
+        }
+        
+        // 每5秒更新一次温度
+        setInterval(updateTemperature, 5000);
+        
+        // 学校详情
+        function showSchoolDetail(schoolCode) {
+            const schoolNames = {
+                'hit': '哈尔滨工业大学',
+                'heu': '哈尔滨工程大学',
+                'nefu': '东北林业大学',
+                'neau': '东北农业大学',
+                'hrbmu': '哈尔滨医科大学',
+                'hlju': '黑龙江大学',
+                'hrbnu': '哈尔滨师范大学',
+                'hust': '哈尔滨理工大学'
+            };
+            
+            const schoolName = schoolNames[schoolCode];
+            alert(`${schoolName} 详细数据征集中...\n\n📢 如果你是该校学生，欢迎分享真实情况！\n\n我们需要的信息：\n• 🌡️ 宿舍实际温度数据\n• ❄️ 空调/风扇安装情况\n• 📝 向学校反馈的经历\n• 💰 夏季额外生活成本\n• 🏠 宿舍环境体验\n\n📋 投稿方式：\n• GitHub Issues\n• 邮箱征集（建设中）\n• Pull Request\n\n您的真实分享很重要！`);
+        }
+        
+        // 功能按钮
+        function contributeData() {
+            alert('📊 提交数据功能：\n\n请通过以下方式提交：\n• GitHub Issues\n• 邮箱投稿\n• Pull Request\n\n我们需要：\n✅ 室内外温度对比\n✅ 测量时间和天气\n✅ 宿舍楼栋信息\n✅ 降温设施情况');
+        }
+        
+        function reportIssue() {
+            alert('📝 投诉记录功能：\n\n分享你的投诉经历：\n• 投诉时间和方式\n• 学校回应情况\n• 实际改善效果\n• 处理满意度评价\n\n帮助其他同学了解学校态度！');
+        }
+        
+        function shareCosts() {
+            alert('💰 生活成本分享：\n\n夏季额外开销：\n• 风扇/空调费用\n• 降温用品采购\n• 额外电费支出\n• 其他相关花费\n\n为学弟学妹提供预算参考！');
+        }
+        
+        function viewReports() {
+            alert('📊 详细报告查看：\n\n🔍 查看内容：\n• 各校环境对比\n• 温度数据统计\n• 改善进度跟踪\n• 学生满意度排行\n\n功能开发中，敬请期待！');
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            updateTemperature();
+        };
+    </script>
+</body>
+</html>

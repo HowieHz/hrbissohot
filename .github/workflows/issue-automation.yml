@@ -1,0 +1,150 @@
+name: 📋 Issue 自动处理
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+jobs:
+  process-environment-info:
+    if: contains(github.event.issue.labels.*.name, 'environment-info')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 📝 处理环境信息提交
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const issue = context.payload.issue;
+          
+          console.log('📋 处理环境信息 Issue:', issue.title);
+          
+          // 添加确认评论
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: `🔥 感谢您提交环境信息！
+            
+          ## ✅ 我们已收到您的提交
+          
+          - **Issue编号**: #${issue.number}
+          - **提交时间**: ${new Date().toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'})}
+          - **状态**: 待审核
+          
+          ## 📋 下一步
+          
+          1. **人工审核**: 我们会在24小时内审核您的信息
+          2. **数据整理**: 通过审核后将整理到对应学校文件夹
+          3. **报告更新**: 定期更新统计报告，您的贡献会被体现
+          
+          ## 🤝 感谢
+          
+          您的真实分享对帮助学弟学妹了解校园环境非常重要！
+          
+          ---
+          *🤖 此消息由 GitHub Actions 自动发送*`
+          });
+          
+          // 添加标签
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            labels: ['待审核', '数据提交']
+          });
+
+  auto-label:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🏷️ 自动添加标签
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const title = issue.title.toLowerCase();
+          const body = issue.body.toLowerCase();
+          
+          let labels = [];
+          
+          // 根据标题和内容自动添加标签
+          if (title.includes('哈工大') || title.includes('hit') || body.includes('哈尔滨工业大学')) {
+            labels.push('哈工大');
+          }
+          if (title.includes('哈工程') || title.includes('heu') || body.includes('哈尔滨工程大学')) {
+            labels.push('哈工程');
+          }
+          if (title.includes('东北林') || title.includes('nefu') || body.includes('东北林业大学')) {
+            labels.push('东北林大');
+          }
+          if (title.includes('东北农') || title.includes('neau') || body.includes('东北农业大学')) {
+            labels.push('东北农大');
+          }
+          
+          // 按内容类型添加标签
+          if (title.includes('宿舍') || title.includes('dormitory') || body.includes('室内温度')) {
+            labels.push('宿舍环境');
+          }
+          if (title.includes('空调') || title.includes('cooling') || body.includes('降温')) {
+            labels.push('降温设施');
+          }
+          if (title.includes('投诉') || title.includes('反馈') || body.includes('学校回应')) {
+            labels.push('投诉反馈');
+          }
+          if (title.includes('费用') || title.includes('成本') || body.includes('电费')) {
+            labels.push('生活成本');
+          }
+          
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: labels
+            });
+            
+            console.log('🏷️ 自动添加标签:', labels.join(', '));
+          }
+
+  welcome-contributor:
+    if: github.event.action == 'opened' && github.event.issue.author_association == 'NONE'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🎉 欢迎新贡献者
+      uses: actions/github-script@v6
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.issue.number,
+            body: `🎉 欢迎来到"哈尔滨太™热了"项目！
+            
+          感谢您愿意分享真实的校园环境信息！您的贡献将帮助更多学弟学妹了解真实情况。
+          
+          ## 📋 提交提醒
+          
+          为了更好地处理您的信息，请确保：
+          
+          - ✅ 提供具体的学校和校区信息
+          - ✅ 包含真实的温度或费用数据
+          - ✅ 标注信息的时间范围
+          - ✅ 说明信息来源的可信度
+          
+          ## 🤝 参与方式
+          
+          - 📝 **数据提交**: 分享您的真实经历
+          - 🔍 **信息验证**: 帮助验证其他同学的信息
+          - 📊 **数据分析**: 参与项目维护和改进
+          
+          再次感谢您的参与！🔥❤️`
+          });

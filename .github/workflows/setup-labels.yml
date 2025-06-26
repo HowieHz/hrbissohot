@@ -1,0 +1,106 @@
+name: 🏷️ 初始化项目标签
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths: ['.github/workflows/setup-labels.yml']
+
+jobs:
+  setup-labels:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🏷️ 创建项目标签
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const labels = [
+            // 基础标签
+            { name: 'environment-info', color: 'ff6b6b', description: '环境信息提交' },
+            { name: '待审核', color: 'ffa500', description: '等待人工审核' },
+            { name: '已确认', color: '28a745', description: '信息已确认' },
+            { name: '需要更多信息', color: 'f39c12', description: '需要补充更多详细信息' },
+            { name: '数据提交', color: '3498db', description: '用户提交的数据' },
+            
+            // 学校标签
+            { name: '哈工大', color: 'e74c3c', description: '哈尔滨工业大学' },
+            { name: '哈工程', color: 'e67e22', description: '哈尔滨工程大学' },
+            { name: '东北林大', color: '27ae60', description: '东北林业大学' },
+            { name: '东北农大', color: '2ecc71', description: '东北农业大学' },
+            { name: '哈医大', color: 'e91e63', description: '哈尔滨医科大学' },
+            { name: '黑大', color: '9b59b6', description: '黑龙江大学' },
+            { name: '哈师大', color: '34495e', description: '哈尔滨师范大学' },
+            { name: '哈理工', color: '95a5a6', description: '哈尔滨理工大学' },
+            { name: '其他学校', color: 'bdc3c7', description: '其他哈尔滨高校' },
+            
+            // 信息类型标签
+            { name: '宿舍环境', color: 'ff9f43', description: '宿舍温度、通风等环境信息' },
+            { name: '降温设施', color: '00d2d3', description: '空调、风扇等降温设备' },
+            { name: '投诉反馈', color: 'ff6348', description: '学校处理态度和改善情况' },
+            { name: '生活成本', color: '2ed573', description: '因高温产生的额外费用' },
+            
+            // 优先级标签
+            { name: '高优先级', color: 'dc3545', description: '重要或紧急的信息' },
+            { name: '中优先级', color: 'ffc107', description: '一般重要的信息' },
+            { name: '低优先级', color: '6c757d', description: '参考性信息' },
+            
+            // 状态标签
+            { name: '征集中', color: '17a2b8', description: '正在征集相关信息' },
+            { name: '已完成', color: '28a745', description: '信息收集完成' },
+            { name: '需要验证', color: 'fd7e14', description: '信息需要进一步验证' },
+            
+            // 特殊标签
+            { name: 'bug', color: 'd73a49', description: '项目bug或问题' },
+            { name: 'enhancement', color: 'a2eeef', description: '功能改进建议' },
+            { name: 'documentation', color: '0075ca', description: '文档相关' },
+            { name: 'good-first-issue', color: '7057ff', description: '适合新贡献者的任务' },
+            { name: 'help-wanted', color: '008672', description: '需要帮助' },
+            { name: 'question', color: 'd876e3', description: '疑问或咨询' }
+          ];
+          
+          console.log('🏷️ 开始创建标签...');
+          
+          for (const label of labels) {
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label.name,
+                color: label.color,
+                description: label.description
+              });
+              console.log(`✅ 创建标签: ${label.name}`);
+            } catch (error) {
+              if (error.status === 422) {
+                // 标签已存在，尝试更新
+                try {
+                  await github.rest.issues.updateLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  console.log(`🔄 更新标签: ${label.name}`);
+                } catch (updateError) {
+                  console.log(`❌ 更新标签失败: ${label.name} - ${updateError.message}`);
+                }
+              } else {
+                console.log(`❌ 创建标签失败: ${label.name} - ${error.message}`);
+              }
+            }
+          }
+          
+          console.log('🎉 标签设置完成！');
+          
+    - name: 📋 设置Issue模板标签
+      uses: actions/github-script@v6
+      with:
+        script: |
+          console.log('📋 Issue模板和标签设置完成');
+          console.log('✅ 项目已准备好接收环境信息提交');
+          console.log('🔗 用户可以通过以下方式参与:');
+          console.log('   - 使用Issue模板提交信息');
+          console.log('   - 标签会自动分类管理');
+          console.log('   - 自动化工作流会处理提交');

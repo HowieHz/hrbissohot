@@ -1,0 +1,16 @@
+# 哈尔滨太热了项目依赖
+# 用于 GitHub Actions 自动构建
+
+# 基础依赖 - 无外部依赖，使用Python标准库
+# pathlib - 路径处理（Python 3.4+内置）
+# json - JSON处理（Python标准库）
+# re - 正则表达式（Python标准库）
+# datetime - 时间处理（Python标准库）
+# statistics - 统计计算（Python 3.4+内置）
+# collections - 数据结构（Python标准库）
+
+# 如果将来需要添加外部依赖，请在下面添加：
+# requests>=2.25.1
+# beautifulsoup4>=4.9.3
+# pandas>=1.3.0
+# matplotlib>=3.3.0

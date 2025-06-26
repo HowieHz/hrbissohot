@@ -1,0 +1,104 @@
+name: 📊 自动数据更新
+
+on:
+  push:
+    paths:
+      - 'schools/**/*.md'
+      - 'tools/**/*.py'
+  schedule:
+    # 每天北京时间上午9点运行
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🐍 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: 📊 运行数据分析
+      run: |
+        echo "🔍 开始数据分析..."
+        python tools/environment_analyzer.py .
+        
+    - name: 📈 生成最新统计
+      run: |
+        echo "📋 生成统计信息..."
+        
+        # 创建当日报告
+        DATE=$(date '+%Y-%m-%d')
+        echo "# 📊 每日数据报告 - $DATE" > data/daily_report_$DATE.md
+        echo "" >> data/daily_report_$DATE.md
+        echo "## 🏫 学校参与情况" >> data/daily_report_$DATE.md
+        
+        TOTAL_SCHOOLS=0
+        TOTAL_REPORTS=0
+        
+        for school_dir in schools/*/; do
+          if [ -d "$school_dir" ]; then
+            school_name=$(basename "$school_dir")
+            report_count=$(find "$school_dir" -name "*.md" -not -name "README.md" | wc -l)
+            
+            if [ $report_count -gt 0 ]; then
+              echo "- **$school_name**: $report_count 个报告" >> data/daily_report_$DATE.md
+              TOTAL_SCHOOLS=$((TOTAL_SCHOOLS + 1))
+              TOTAL_REPORTS=$((TOTAL_REPORTS + report_count))
+            fi
+          fi
+        done
+        
+        echo "" >> data/daily_report_$DATE.md
+        echo "## 📊 总体统计" >> data/daily_report_$DATE.md
+        echo "- 📚 参与学校总数: $TOTAL_SCHOOLS" >> data/daily_report_$DATE.md
+        echo "- 📝 数据报告总数: $TOTAL_REPORTS" >> data/daily_report_$DATE.md
+        echo "- 🕐 更新时间: $(date '+%Y-%m-%d %H:%M:%S')" >> data/daily_report_$DATE.md
+        
+        # 更新主统计文件
+        echo "📊 更新主统计..."
+        echo "# 🔥 哈尔滨太热了 - 实时统计" > data/live_stats.md
+        echo "" >> data/live_stats.md
+        echo "- 📚 参与学校: $TOTAL_SCHOOLS 所" >> data/live_stats.md
+        echo "- 📝 数据报告: $TOTAL_REPORTS 个" >> data/live_stats.md
+        echo "- 🕐 最后更新: $(date '+%Y-%m-%d %H:%M:%S')" >> data/live_stats.md
+        
+    - name: 🔄 提交更新
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        
+        # 添加修改的文件
+        git add data/
+        
+        # 检查是否有变化
+        if git diff --staged --quiet; then
+          echo "📭 没有数据更新"
+        else
+          echo "📝 发现数据更新，正在提交..."
+          git commit -m "🤖 自动更新数据统计 $(date '+%Y-%m-%d %H:%M')"
+          git push
+          echo "✅ 数据更新完成"
+        fi
+        
+    - name: 📊 输出统计摘要
+      run: |
+        echo "## 🎯 统计摘要"
+        echo "- 📊 分析完成时间: $(date)"
+        echo "- 📝 总报告数: $(find schools -name '*.md' -not -name 'README.md' | wc -l)"
+        echo "- 🏫 活跃学校数: $(find schools -maxdepth 1 -type d -not -name 'schools' | wc -l)"
+        
+        if [ -f "data/environment_data.json" ]; then
+          echo "- 📄 JSON数据文件已生成"
+        fi
+        
+        if [ -f "data/summary_report.md" ]; then
+          echo "- 📋 汇总报告已更新"
+        fi

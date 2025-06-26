@@ -1,0 +1,264 @@
+name: 🔥 哈尔滨太热了 - 自动构建和部署
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # 每天 UTC 2:00 (北京时间 10:00) 自动运行
+    - cron: '0 2 * * *'
+
+jobs:
+  build-and-analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 🐍 设置 Python 环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: 📦 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || echo "No requirements.txt found, skipping..."
+        
+    - name: 📊 运行数据分析
+      run: |
+        echo "🔍 分析环境数据..."
+        python tools/environment_analyzer.py .
+        
+    - name: 📈 生成统计报告
+      run: |
+        echo "📋 更新项目统计..."
+        echo "## 🏗️ 自动构建报告" > build_report.md
+        echo "" >> build_report.md
+        echo "📅 构建时间: $(date)" >> build_report.md
+        echo "🔗 提交哈希: ${{ github.sha }}" >> build_report.md
+        echo "👤 提交者: ${{ github.actor }}" >> build_report.md
+        echo "" >> build_report.md
+        echo "### 📊 数据统计" >> build_report.md
+        
+        # 统计各类文件数量
+        SCHOOL_COUNT=$(find schools -name "*.md" -not -name "README.md" | wc -l)
+        DORMITORY_COUNT=$(find schools -path "*/dormitory/*.md" | wc -l)
+        FEEDBACK_COUNT=$(find schools -path "*/feedback/*.md" | wc -l)
+        COOLING_COUNT=$(find schools -path "*/cooling/*.md" | wc -l)
+        COSTS_COUNT=$(find schools -path "*/costs/*.md" | wc -l)
+        
+        echo "- 📝 总报告数: $SCHOOL_COUNT" >> build_report.md
+        echo "- 🏠 宿舍环境: $DORMITORY_COUNT" >> build_report.md
+        echo "- 📋 投诉反馈: $FEEDBACK_COUNT" >> build_report.md
+        echo "- ❄️ 降温设施: $COOLING_COUNT" >> build_report.md
+        echo "- 💰 生活成本: $COSTS_COUNT" >> build_report.md
+        
+        echo "" >> build_report.md
+        echo "### 🏫 参与学校" >> build_report.md
+        find schools -maxdepth 1 -type d -not -name "schools" | sort | while read dir; do
+          if [ -d "$dir" ]; then
+            school_name=$(basename "$dir")
+            report_count=$(find "$dir" -name "*.md" -not -name "README.md" | wc -l)
+            echo "- $school_name: $report_count 个报告" >> build_report.md
+          fi
+        done
+        
+        echo "" >> build_report.md
+        echo "---" >> build_report.md
+        echo "*本报告由 GitHub Actions 自动生成*" >> build_report.md
+        
+    - name: 🔄 更新数据文件
+      run: |
+        # 确保data目录存在
+        mkdir -p data
+        
+        # 移动构建报告到data目录
+        mv build_report.md data/
+        
+        # 更新README中的统计信息
+        echo "📝 更新README统计..."
+        
+    - name: 🌐 构建网站
+      run: |
+        echo "🏗️ 构建网站文件到 dist 目录..."
+        
+        # 清理并创建构建目录
+        rm -rf dist
+        mkdir -p dist
+        
+        # 复制主要网站文件
+        cp index.html dist/
+        
+        # 复制资源文件（如果存在）
+        if [ -d "images" ]; then
+          cp -r images dist/
+          echo "📷 已复制图片资源"
+        fi
+        
+        # 复制数据文件
+        if [ -d "data" ]; then
+          cp -r data dist/
+          echo "📊 已复制数据文件"
+        fi
+        
+        # 创建API端点
+        mkdir -p dist/api
+        if [ -f "data/environment_data.json" ]; then
+          cp data/environment_data.json dist/api/data.json
+          echo "🔗 已创建API端点"
+        fi
+        
+        # 生成站点地图
+        echo "https://hrbistohot.com/" > dist/sitemap.txt
+        echo "https://hrbistohot.com/api/data.json" >> dist/sitemap.txt
+        
+        # 生成robots.txt
+        echo "User-agent: *" > dist/robots.txt
+        echo "Allow: /" >> dist/robots.txt
+        echo "Sitemap: https://hrbistohot.com/sitemap.txt" >> dist/robots.txt
+        
+        # 复制CNAME文件（如果存在）
+        if [ -f "CNAME" ]; then
+          cp CNAME dist/
+        fi
+        
+        # 生成网站元信息，禁用Jekyll处理
+        touch dist/.nojekyll
+        
+        echo "✅ 网站构建完成，所有文件在 dist/ 目录"
+        echo "📂 构建内容:"
+        ls -la dist/
+        
+    - name: 📋 验证数据完整性
+      run: |
+        echo "🔍 验证项目数据完整性..."
+        
+        # 检查必要文件
+        required_files=("README.md" "index.html" "docs/CONTRIBUTING.md")
+        
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ $file 存在"
+          else
+            echo "❌ $file 缺失"
+            exit 1
+          fi
+        done
+        
+        # 检查学校目录结构
+        echo "🏫 检查学校目录结构..."
+        for school_dir in schools/*/; do
+          if [ -d "$school_dir" ]; then
+            school_name=$(basename "$school_dir")
+            echo "📂 检查 $school_name"
+            
+            required_subdirs=("dormitory" "cooling" "feedback" "costs")
+            for subdir in "${required_subdirs[@]}"; do
+              if [ -d "$school_dir$subdir" ]; then
+                echo "  ✅ $subdir 目录存在"
+              else
+                echo "  ⚠️ $subdir 目录缺失，正在创建..."
+                mkdir -p "$school_dir$subdir"
+              fi
+            done
+          fi
+        done
+        
+        echo "✅ 数据验证完成"
+        
+    - name: 📊 生成项目仪表板
+      run: |
+        echo "📈 生成项目仪表板..."
+        
+        cat > data/dashboard.md << 'EOF'
+        # 🔥 哈尔滨太热了 - 项目仪表板
+        
+        ## 📊 实时统计
+        
+        EOF
+        
+        # 添加统计信息
+        echo "- 🕐 最后更新: $(date)" >> data/dashboard.md
+        echo "- 📝 数据报告: $(find schools -name '*.md' -not -name 'README.md' | wc -l) 个" >> data/dashboard.md
+        echo "- 🏫 参与学校: $(find schools -maxdepth 1 -type d -not -name 'schools' | wc -l) 所" >> data/dashboard.md
+        echo "" >> data/dashboard.md
+        
+        echo "## 🏆 贡献排行" >> data/dashboard.md
+        echo "" >> data/dashboard.md
+        echo "### 📈 按学校" >> data/dashboard.md
+        find schools -maxdepth 1 -type d -not -name "schools" | while read dir; do
+          if [ -d "$dir" ]; then
+            school_name=$(basename "$dir")
+            report_count=$(find "$dir" -name "*.md" -not -name "README.md" | wc -l)
+            echo "- **$school_name**: $report_count 个报告" >> data/dashboard.md
+          fi
+        done
+        
+        echo "" >> data/dashboard.md
+        echo "## 🎯 征集进度" >> data/dashboard.md
+        echo "" >> data/dashboard.md
+        echo "### 📋 各类信息" >> data/dashboard.md
+        echo "- 🏠 宿舍环境: $(find schools -path '*/dormitory/*.md' | wc -l)" >> data/dashboard.md
+        echo "- ❄️ 降温设施: $(find schools -path '*/cooling/*.md' | wc -l)" >> data/dashboard.md
+        echo "- 📝 投诉反馈: $(find schools -path '*/feedback/*.md' | wc -l)" >> data/dashboard.md
+        echo "- 💰 生活成本: $(find schools -path '*/costs/*.md' | wc -l)" >> data/dashboard.md
+        
+        echo "" >> data/dashboard.md
+        echo "---" >> data/dashboard.md
+        echo "*⚡ 由 GitHub Actions 自动更新*" >> data/dashboard.md
+        
+    - name: 🚀 部署到 GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        cname: hrbistohot.com
+        # 如果有自定义域名，在这里填写
+        
+    - name: 📝 提交更新的数据文件
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        git add data/
+        
+        if git diff --staged --quiet; then
+          echo "📭 没有数据更新，跳过提交"
+        else
+          git commit -m "🤖 自动更新数据统计 $(date '+%Y-%m-%d %H:%M')"
+          git push
+        fi
+        
+    - name: 📊 输出构建摘要
+      run: |
+        echo "🎉 构建完成！"
+        echo ""
+        echo "📊 构建摘要:"
+        echo "- 🕐 构建时间: $(date)"
+        echo "- 📝 总报告数: $(find schools -name '*.md' -not -name 'README.md' | wc -l)"
+        echo "- 🏫 参与学校: $(find schools -maxdepth 1 -type d -not -name 'schools' | wc -l)"
+        echo "- 📊 数据文件: $(ls -la data/ | wc -l) 个"
+        echo ""
+        echo "🌐 网站地址: https://${{ github.repository_owner }}.github.io/hrbissohot"
+        echo ""
+        echo "🔗 查看详细报告: data/dashboard.md"
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: build-and-analyze
+    if: failure()
+    
+    steps:
+    - name: 🚨 构建失败通知
+      run: |
+        echo "❌ 构建失败！"
+        echo "📧 如需调试，请查看 GitHub Actions 日志"
+        echo "🔧 常见问题："
+        echo "- 检查 Python 脚本语法"
+        echo "- 验证文件路径是否正确"
+        echo "- 确保必要的依赖已安装"
