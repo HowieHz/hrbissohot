@@ -1,6 +1,5 @@
 import json
-from datetime import datetime
-import re
+from datetime import datetime, timezone, timedelta
 
 def render_html():
     # 从 data.json 加载数据
@@ -8,7 +7,7 @@ def render_html():
         data = json.load(f)
 
     # 更新最后更新时间
-    data['footer']['lastUpdate'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    data['footer']['lastUpdate'] = datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M:%S (UTC+8)')
 
     # 1. 生成空调覆盖情况汇总 HTML
     ac_coverage = {
@@ -170,9 +169,6 @@ def render_html():
     rendered_html = rendered_html.replace('{{CONTRIBUTE_CONTENT}}', contribute_html)
     rendered_html = rendered_html.replace('{{SCHOOLS_CONTENT}}', schools_html)
     rendered_html = rendered_html.replace('{{FOOTER_CONTENT}}', footer_html)
-
-    # 移除 JS 脚本部分
-    rendered_html = re.sub(r'<script>.*?</script>', '', rendered_html, flags=re.DOTALL)
 
     # 将渲染好的 HTML 写回 index.html
     with open('index.html', 'w', encoding='utf-8') as f:
